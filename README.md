@@ -10,8 +10,8 @@ I was inspired by Nitin Vig to try this one, please visit his Github for more de
 
 # Nota Bene
 
+```
 There is a small difference on the FastMCP command as follow:
-
 1/Before version 2.10.3: fastmcp install <MCP Server Path>
 2/After version 2.10.3: fastmcp install claude-desktop <MCP Server Path>
 
@@ -30,7 +30,9 @@ FastMCP 2.0 - The fast, Pythonic way to build MCP servers and clients.
 
 Commands 
 dev        Run an MCP server with the MCP Inspector for development.                                                                                                                             inspect    Inspect an MCP server and generate a JSON report.                                                                                                                                     install    Install MCP servers in various clients and formats.                                                                                                                                   run        Run an MCP server or connect to a remote one.                                                                                                                                          version    Display version information and platform details.                                                                                                                                       --help -h  Display this message and exit.                                                                                                                                                          --version  Display application version.                                                                                                                                                          
+```
 
 #disclaimer
-
+```
 The functions available tools (apstra_mcp.py) is a living documentation, I will try to add the capabilities along the time and it is not perfect. :) 
+```
