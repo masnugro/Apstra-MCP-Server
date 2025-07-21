@@ -1,6 +1,6 @@
 # Apstra-MCP-Server
 
-This is to connect Apstra with A2A (Agent-to-Agent) using Claude & MCP.
+This is to connect Apstra with Claude & MCP (FASTMCP/Claude Desktop) in order to interact with natural language.
 
 I was inspired by Nitin Vig to try this one, please visit his Github for more detail on how to create the MCP Server/Client connectivity: https://github.com/vignitin/apstra-mcp-server  
 
