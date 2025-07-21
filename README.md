@@ -32,7 +32,7 @@ Commands
 dev        Run an MCP server with the MCP Inspector for development.                                                                                                                             inspect    Inspect an MCP server and generate a JSON report.                                                                                                                                     install    Install MCP servers in various clients and formats.                                                                                                                                   run        Run an MCP server or connect to a remote one.                                                                                                                                          version    Display version information and platform details.                                                                                                                                       --help -h  Display this message and exit.                                                                                                                                                          --version  Display application version.                                                                                                                                                          
 ```
 
-#disclaimer
+# Disclaimer
 ```
 The functions available tools (apstra_mcp.py) is a living documentation, I will try to add the capabilities along the time and it is not perfect. :) 
 ```
