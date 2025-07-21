@@ -11,8 +11,9 @@ I was inspired by Nitin Vig to try this one, please visit his Github for more de
 # Nota Bene
 
 There is a small difference on the FastMCP command as follow:
-Before version 2.10.3: fastmcp install <MCP Server Path>
-After version 2.10.3: fastmcp install claude-desktop <MCP Server Path>
+
+1/Before version 2.10.3: fastmcp install <MCP Server Path>
+2/After version 2.10.3: fastmcp install claude-desktop <MCP Server Path>
 
 masnugro@mbp% fastmcp version
 	FastMCP version:2.10.5
