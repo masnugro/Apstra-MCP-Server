@@ -33,6 +33,10 @@ FastMCP 2.0 - The fast, Pythonic way to build MCP servers and clients.
 
 <img width="1497" height="878" alt="image" src="https://github.com/user-attachments/assets/245a7ef2-cb76-4b3d-a632-7199dc553090" />
 
+<img width="747" height="719" alt="image" src="https://github.com/user-attachments/assets/850d04c7-b695-492b-a101-32aa565e1e6a" />
+
+<img width="747" height="366" alt="image" src="https://github.com/user-attachments/assets/bb084ff9-5042-4423-b207-ee364a36c0a4" />
+
 
 # Disclaimer
 ```
