@@ -29,6 +29,11 @@ Usage: fastmcp COMMAND
 FastMCP 2.0 - The fast, Pythonic way to build MCP servers and clients.                                                                                                                             
 ```
 
+## Sample Output
+
+<img width="1497" height="878" alt="image" src="https://github.com/user-attachments/assets/245a7ef2-cb76-4b3d-a632-7199dc553090" />
+
+
 # Disclaimer
 ```
 The functions available tools (apstra_mcp.py) is a living documentation, I will try to add the capabilities along the time and it is not perfect. :) 
