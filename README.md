@@ -29,6 +29,27 @@ Usage: fastmcp COMMAND
 FastMCP 2.0 - The fast, Pythonic way to build MCP servers and clients.                                                                                                                             
 ```
 
+## Tool List
+
+```
+1/ get blueprint
+2/ get racks
+3/ create virtual networks
+4/ get difference status
+5/ post (commit a new changes)
+6/ get all blueprints
+7/ get device OS
+8/ get chassis profiles
+9/ get Apstra version
+10/ get running devices in blueprint
+11/ create security zone
+12/ get blueprint metric
+13/ get remote gateway
+14/ get property set
+15/ get SRX configlet
+
+```
+
 ## Sample Output
 
 <img width="1497" height="878" alt="image" src="https://github.com/user-attachments/assets/245a7ef2-cb76-4b3d-a632-7199dc553090" />
