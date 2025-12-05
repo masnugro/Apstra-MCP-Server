@@ -63,5 +63,5 @@ FastMCP 2.0 - The fast, Pythonic way to build MCP servers and clients.
 
 # Disclaimer
 ```
-The functions available tools (apstra_mcp.py) is a living documentation, I will try to add the capabilities along the time and it is not perfect. :) 
+The available function tools (apstra_mcp.py) is a living documentation, I will try to add the capabilities along the time. :) 
 ```
