@@ -62,6 +62,21 @@ def get_bp() -> Optional[List[dict]]:
         return None
 
 @mcp.tool()
+def get_bp() -> Optional[List[dict]]:
+    """Gets blueprint information"""
+    try:
+        headers = auth(aos_server, username, password)
+        if not headers:
+            return None
+        url = f'https://{aos_server}/api/blueprints'
+        response = httpx.get(url, headers=headers, verify=False)
+        response.raise_for_status()
+        return response.json().get('items')
+    except Exception as e:
+        print(f"An unexpected error occurred in get_bp: {e}", file=sys.stderr)
+        return None
+
+@mcp.tool()
 def get_racks(blueprint_id: str) -> Optional[List[dict]]:
     """Gets rack information for a blueprint"""
     try:
@@ -204,41 +219,85 @@ def create_blueprint_from_template(label: str, init_type: str = "template_refere
 
 
 @mcp.tool()
-def list_virtual_networks(blueprint_id: str) -> Optional[List[dict]]:
+def list_virtual_networks(blueprint_id: str) -> dict:
     """List all virtual networks in a blueprint"""
     try:
         headers = auth(aos_server, username, password)
         if not headers:
-            return None
+            return {"error": "Authentication failed"}
+
         url = f'https://{aos_server}/api/blueprints/{blueprint_id}/experience/web/virtual-networks'
         response = httpx.get(url, headers=headers, verify=False)
         response.raise_for_status()
-        return response.json().get("items", [])
+
+        data = response.json()
+        virtual_networks = data.get("virtual_networks", {})
+
+        return {
+            "virtual_networks": virtual_networks,
+            "count": len(virtual_networks),
+            "version": data.get("version")
+        }
+
+    except httpx.HTTPStatusError as e:
+        error_msg = f"HTTP {e.response.status_code}: {e.response.text}"
+        print(error_msg, file=sys.stderr)
+        return {"error": error_msg}
     except Exception as e:
-        print(f"An unexpected error occurred in list_virtual_networks: {e}", file=sys.stderr)
-        return None
+        error_msg = f"An unexpected error occurred in list_virtual_networks: {e}"
+        print(error_msg, file=sys.stderr)
+        return {"error": error_msg}
 
 @mcp.tool()
-def delete_vn(blueprint_id: str, security_zone_id: str, vn_name: str) -> Optional[dict]:
+def delete_vn(blueprint_id: str, security_zone_id: str, vn_name: str) -> dict:
     """delete a virtual network in a given blueprint and routing zone"""
     try:
         headers = auth(aos_server, username, password)
         if not headers:
-            return None
+            return {"error": "Authentication failed"}
+
+        # First, get the virtual network ID by listing all VNs
+        list_url = f'https://{aos_server}/api/blueprints/{blueprint_id}/virtual-networks'
+        list_response = httpx.get(list_url, headers=headers, verify=False)
+        list_response.raise_for_status()
+
+        vn_id = None
+        vns = list_response.json()
+
+        # Find the VN ID by matching name and security zone
+        if 'virtual_networks' in vns:
+            for vn in vns['virtual_networks'].values():
+                if vn.get('label') == vn_name and vn.get('security_zone_id') == security_zone_id:
+                    vn_id = vn.get('id')
+                    break
+
+        if not vn_id:
+            return {"error": f"Virtual network '{vn_name}' not found in security zone {security_zone_id}"}
+
+        # Now delete using the VN ID
         url = f'https://{aos_server}/api/blueprints/{blueprint_id}/delete-virtual-networks'
         data = {
-            "label": vn_name,
-            "vn_type": "vxlan",
-            "security_zone_id": security_zone_id
+            "virtual_network_ids": [vn_id]  # API expects a list of IDs
         }
         response = httpx.post(url, json=data, headers=headers, verify=False)
         response.raise_for_status()
+
+        # Handle empty response
+        if not response.text or response.text == '':
+            return {"status": "success", "message": f"Virtual network '{vn_name}' (ID: {vn_id}) deleted successfully"}
+
         resp_data = response.json()
         print("Delete VN API response:", resp_data, file=sys.stderr)
         return resp_data
+
+    except httpx.HTTPStatusError as e:
+        error_msg = f"HTTP {e.response.status_code}: {e.response.text}"
+        print(error_msg, file=sys.stderr)
+        return {"error": error_msg}
     except Exception as e:
-        print(f"An unexpected error occurred in delete_vn: {e}", file=sys.stderr)
-        return None
+        error_msg = f"An unexpected error occurred in delete_vn: {e}"
+        print(error_msg, file=sys.stderr)
+        return {"error": error_msg}
 
 @mcp.tool()
 def get_devices_os(blueprint_id: str) -> Optional[List[dict]]:
