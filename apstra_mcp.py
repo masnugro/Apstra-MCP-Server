@@ -62,21 +62,6 @@ def get_bp() -> Optional[List[dict]]:
         return None
 
 @mcp.tool()
-def get_bp() -> Optional[List[dict]]:
-    """Gets blueprint information"""
-    try:
-        headers = auth(aos_server, username, password)
-        if not headers:
-            return None
-        url = f'https://{aos_server}/api/blueprints'
-        response = httpx.get(url, headers=headers, verify=False)
-        response.raise_for_status()
-        return response.json().get('items')
-    except Exception as e:
-        print(f"An unexpected error occurred in get_bp: {e}", file=sys.stderr)
-        return None
-
-@mcp.tool()
 def get_racks(blueprint_id: str) -> Optional[List[dict]]:
     """Gets rack information for a blueprint"""
     try:
@@ -161,62 +146,101 @@ def deploy(blueprint_id: str, description: str, staging_version: int) -> Optiona
         return None
 
 @mcp.tool()
-def delete_bp(blueprint_id: str) -> Optional[dict]:
+def delete_bp(blueprint_id: str) -> dict:
     """Delete the blueprint from Apstra Instance"""
     try:
         headers = auth(aos_server, username, password)
         if not headers:
-            return None
+            return {"error": "Authentication failed"}
         url = f'https://{aos_server}/api/blueprints/{blueprint_id}'
         response = httpx.delete(url, headers=headers, verify=False)
         response.raise_for_status()
-        return {"message": "Blueprint deleted succesfully"}
+
+        # Handle empty response
+        if not response.text or response.text == '':
+            return {"status": "success", "message": f"Blueprint {blueprint_id} deleted successfully"}
+
+        return response.json()
+
     except httpx.HTTPStatusError as e:
-        return {"error": f"HTTP error: {e.response.status_code} - {e.response.text}"}
+        error_msg = f"HTTP {e.response.status_code}: {e.response.text}"
+        print(f"HTTP error in delete_bp: {error_msg}", file=sys.stderr)
+        return {"error": error_msg, "status": "failed"}
     except Exception as e:
-        print(f"An unexpected error occurred in delete_bp: {e}", file=sys.stderr)
-        return None
+        error_msg = f"Unexpected error in delete_bp: {e}"
+        print(error_msg, file=sys.stderr)
+        return {"error": error_msg, "status": "failed"}
 
 @mcp.tool()
-def create_blueprint_from_template(label: str, init_type: str = "template_reference") -> Optional[dict]:
+def create_blueprint_from_template(
+    label: str,
+    template_name: str = "connectorops_2spine4leaf",  # Changed default
+    init_type: str = "template_reference"
+) -> dict:
     """
-    Creates a new blueprint using the 'Rack Based' template, initialized appropriately so it appears in Apstra UI.
+    Creates a new blueprint using a specified template.
     """
     try:
         headers = auth(aos_server, username, password)
         if not headers:
-            return None
+            return {"error": "Authentication failed"}
 
         # 1. Get available templates
-        templates_url = f"https://{aos_server}/api/blueprints/templates"
+        templates_url = f"https://{aos_server}/api/design/templates"
         templates_resp = httpx.get(templates_url, headers=headers, verify=False)
         templates_resp.raise_for_status()
-        templates = templates_resp.json().get("items", [])
 
-        # 2. Find the 'Rack Based' template
-        rack_template = next((t for t in templates if t.get("name") == "Rack Based"), None)
-        if not rack_template:
-            print("Rack Based blueprint template not found.", file=sys.stderr)
-            return {"error": "Rack Based blueprint template not found"}
+        templates_data = templates_resp.json()
 
-        # 3. Create blueprint with correct init_type
+        # Handle both dict and list responses
+        if isinstance(templates_data, dict):
+            templates = templates_data.get("items", {})
+            if isinstance(templates, list):
+                templates = {t.get("id", idx): t for idx, t in enumerate(templates)}
+        elif isinstance(templates_data, list):
+            templates = {t.get("id", idx): t for idx, t in enumerate(templates_data)}
+        else:
+            templates = {}
+
+        # 2. Find the specified template
+        target_template = None
+        for template_id, template_data in templates.items():
+            t_name = template_data.get("display_name") or template_data.get("label") or template_data.get("name")
+            if t_name == template_name:
+                target_template = template_data
+                target_template["id"] = template_id
+                break
+
+        if not target_template:
+            available = [t.get("display_name") or t.get("label") or t.get("name") for t in templates.values()]
+            return {"error": f"Template '{template_name}' not found", "available_templates": available}
+
+        # 3. Create blueprint
         create_url = f"https://{aos_server}/api/blueprints"
         data = {
             "label": label,
-            "template_id": rack_template["id"],
+            "template_id": target_template["id"],
+            "design": "two_stage_l3clos",
             "init_type": init_type
         }
+
+        print(f"Creating blueprint with data: {data}", file=sys.stderr)
         create_resp = httpx.post(create_url, json=data, headers=headers, verify=False)
         create_resp.raise_for_status()
+
+        if not create_resp.text or create_resp.text == '':
+            return {"status": "success", "message": f"Blueprint '{label}' created successfully"}
+
         return create_resp.json()
 
     except httpx.HTTPStatusError as e:
-        print(f"HTTP error in create_blueprint_from_template: {e.response.status_code} - {e.response.text}", file=sys.stderr)
-        return {"error": f"{e.response.status_code} - {e.response.text}"}
+        error_msg = f"HTTP {e.response.status_code}: {e.response.text}"
+        print(f"HTTP error: {error_msg}", file=sys.stderr)
+        return {"error": error_msg}
     except Exception as e:
-        print(f"Unexpected error in create_blueprint_from_template: {e}", file=sys.stderr)
-        return None
-
+        error_msg = f"Unexpected error: {e}"
+        print(error_msg, file=sys.stderr)
+        return {"error": error_msg}
 
 @mcp.tool()
 def list_virtual_networks(blueprint_id: str) -> dict:
@@ -256,6 +280,7 @@ def delete_vn(blueprint_id: str, security_zone_id: str, vn_name: str) -> dict:
         if not headers:
             return {"error": "Authentication failed"}
 
+        # First, get the virtual network ID by listing all VNs
         list_url = f'https://{aos_server}/api/blueprints/{blueprint_id}/virtual-networks'
         list_response = httpx.get(list_url, headers=headers, verify=False)
         list_response.raise_for_status()
@@ -263,6 +288,7 @@ def delete_vn(blueprint_id: str, security_zone_id: str, vn_name: str) -> dict:
         vn_id = None
         vns = list_response.json()
 
+        # Find the VN ID by matching name and security zone
         if 'virtual_networks' in vns:
             for vn in vns['virtual_networks'].values():
                 if vn.get('label') == vn_name and vn.get('security_zone_id') == security_zone_id:
@@ -272,13 +298,15 @@ def delete_vn(blueprint_id: str, security_zone_id: str, vn_name: str) -> dict:
         if not vn_id:
             return {"error": f"Virtual network '{vn_name}' not found in security zone {security_zone_id}"}
 
+        # Now delete using the VN ID
         url = f'https://{aos_server}/api/blueprints/{blueprint_id}/delete-virtual-networks'
         data = {
-            "virtual_network_ids": [vn_id]
+            "virtual_network_ids": [vn_id]  # API expects a list of IDs
         }
         response = httpx.post(url, json=data, headers=headers, verify=False)
         response.raise_for_status()
 
+        # Handle empty response
         if not response.text or response.text == '':
             return {"status": "success", "message": f"Virtual network '{vn_name}' (ID: {vn_id}) deleted successfully"}
 
