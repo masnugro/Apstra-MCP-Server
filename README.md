@@ -47,6 +47,8 @@ FastMCP 2.0 - The fast, Pythonic way to build MCP servers and clients.
 13/ get remote gateway
 14/ get property set
 15/ get SRX configlet
+16/ create a new blueprint
+17/ delete virtual networks
 
 ```
 
