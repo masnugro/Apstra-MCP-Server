@@ -256,7 +256,6 @@ def delete_vn(blueprint_id: str, security_zone_id: str, vn_name: str) -> dict:
         if not headers:
             return {"error": "Authentication failed"}
 
-        # First, get the virtual network ID by listing all VNs
         list_url = f'https://{aos_server}/api/blueprints/{blueprint_id}/virtual-networks'
         list_response = httpx.get(list_url, headers=headers, verify=False)
         list_response.raise_for_status()
@@ -264,7 +263,6 @@ def delete_vn(blueprint_id: str, security_zone_id: str, vn_name: str) -> dict:
         vn_id = None
         vns = list_response.json()
 
-        # Find the VN ID by matching name and security zone
         if 'virtual_networks' in vns:
             for vn in vns['virtual_networks'].values():
                 if vn.get('label') == vn_name and vn.get('security_zone_id') == security_zone_id:
@@ -274,15 +272,13 @@ def delete_vn(blueprint_id: str, security_zone_id: str, vn_name: str) -> dict:
         if not vn_id:
             return {"error": f"Virtual network '{vn_name}' not found in security zone {security_zone_id}"}
 
-        # Now delete using the VN ID
         url = f'https://{aos_server}/api/blueprints/{blueprint_id}/delete-virtual-networks'
         data = {
-            "virtual_network_ids": [vn_id]  # API expects a list of IDs
+            "virtual_network_ids": [vn_id]
         }
         response = httpx.post(url, json=data, headers=headers, verify=False)
         response.raise_for_status()
 
-        # Handle empty response
         if not response.text or response.text == '':
             return {"status": "success", "message": f"Virtual network '{vn_name}' (ID: {vn_id}) deleted successfully"}
 
