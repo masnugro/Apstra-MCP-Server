@@ -153,7 +153,7 @@ def delete_bp(blueprint_id: str) -> dict:
         if not headers:
             return {"error": "Authentication failed"}
         url = f'https://{aos_server}/api/blueprints/{blueprint_id}'
-        response = httpx.delete(url, headers=headers, verify=False)
+        response = httpx.delete(url, headers=headers, verify=False, timeout=30.0)
         response.raise_for_status()
 
         # Handle empty response
