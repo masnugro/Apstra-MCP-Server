@@ -174,7 +174,7 @@ def delete_bp(blueprint_id: str) -> dict:
 @mcp.tool()
 def create_blueprint_from_template(
     label: str,
-    template_name: str = "connectorops_2spine4leaf",  # Changed default
+    template_name: str = "USE_YOUR_OWN_TEMPLATE",  # Changed default
     init_type: str = "template_reference"
 ) -> dict:
     """
