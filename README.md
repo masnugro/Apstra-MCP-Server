@@ -31,26 +31,24 @@ FastMCP 2.0 - The fast, Pythonic way to build MCP servers and clients.
 
 ## Tool List
 
-```
-1/ get blueprint
-2/ get racks
-3/ create virtual networks
-4/ get difference status
-5/ post (commit a new changes)
-6/ get all blueprints
-7/ get device OS
-8/ get chassis profiles
-9/ get Apstra version
-10/ get running devices in blueprint
-11/ create security zone
-12/ get blueprint metric
-13/ get remote gateway
-14/ get property set
-15/ get SRX configlet
-16/ create a new blueprint
-17/ delete virtual networks
+- ```get``` blueprint
+- ```get``` racks
+- ```create``` virtual networks
+- ```get``` difference status
+- ```post``` (deploy a new changes)
+- ```get``` all blueprints
+- ```get``` device OS
+- ```get``` chassis profiles
+- ```get``` Apstra version
+- ```get``` running devices in blueprint
+- ```create``` security zone
+- ```get``` blueprint metric
+- ```get``` remote gateway
+- ```get``` SRX property set ## useful if we connect Apstra with ConnectorOps
+- ```get``` SRX configlet ## useful if we connect Apstra with ConnectorOps
+- ```create``` a new blueprint
+- ```delete``` virtual networks
 
-```
 
 ## Sample Output
 
@@ -62,6 +60,6 @@ FastMCP 2.0 - The fast, Pythonic way to build MCP servers and clients.
 
 
 # Disclaimer
-```
+
 The available function tools (apstra_mcp.py) is a living documentation, I will try to add the capabilities along the time. :) 
-```
+
